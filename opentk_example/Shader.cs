@@ -3,13 +3,14 @@ using System.IO;
 using OpenTK.Graphics.OpenGL4;
 using System.Collections.Generic;
 using System.Text;
+using OpenTK.Mathematics;
 
 namespace opentk_example
 {
     // Class for adding basic shader
     public class Shader
     {
-        private readonly int Handle;
+        public readonly int Handle;
         private readonly Dictionary<string, int> _uniformLocations;
 
         public Shader(string vertPath, string fragPath)
@@ -75,6 +76,11 @@ namespace opentk_example
         {
             GL.UseProgram(Handle);
             GL.Uniform1(_uniformLocations[name], data);
+        }
+        public void SetMatrix4(string name, Matrix4 data)
+        {
+            GL.UseProgram(Handle);
+            GL.UniformMatrix4(_uniformLocations[name], true, ref data);
         }
     }
 }
