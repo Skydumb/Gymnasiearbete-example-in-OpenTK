@@ -87,5 +87,10 @@ namespace opentk_example
             GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data);
         }
+        public void SetFloat(string name, float data)
+        {
+            GL.UseProgram(Handle);
+            GL.Uniform1(_uniformLocations[name], data);
+        }
     }
 }

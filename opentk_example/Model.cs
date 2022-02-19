@@ -36,11 +36,9 @@ namespace opentk_example
             _vertices = vertices;
             _indices = indices;
             transform = Matrix4.Identity;
-            Initialize();
         }
         protected virtual void Initialize()
         {
-
             _vboHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vboHandle);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
@@ -55,7 +53,7 @@ namespace opentk_example
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _eboHandle);
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
         }
-        public virtual void Draw()
+        public virtual void Draw(bool final = true)
         {
             GL.BindVertexArray(_vaoHandle);
             _shader.Use();
@@ -64,7 +62,7 @@ namespace opentk_example
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
             // Calling Draw
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            if (final) GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
         public static Model CubePrimitive()
@@ -97,6 +95,95 @@ namespace opentk_example
             };
             Model cube = new Model(vertices, indices);
             cube.Shader = new Shader("Shaders/Shader.vert", "Shaders/DefaultShader.frag");
+            cube.Initialize();
+            return cube;
+        }
+        public static IlluminatedModel SharpCubePrimitve()
+        {
+            float[] vertices = new float[]
+            {
+                // Front
+                0.5f, 0.5f, 0.5f, // Top-close-right
+                0.5f, -0.5f, 0.5f, // Bottom-close-right
+                -0.5f, -0.5f, 0.5f, // Bottom-close-left
+                -0.5f, 0.5f, 0.5f, // Top-close-left
+                // Back
+                -0.5f, 0.5f, -0.5f, // Top-far-left
+                -0.5f, -0.5f, -0.5f, // Bottom-far-left
+                0.5f, -0.5f, -0.5f, // Bottom-far-right
+                0.5f, 0.5f, -0.5f, // Top-far-right
+                // Top
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, -0.5f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, 0.5f, 0.5f,
+                // Bottom
+                0.5f, -0.5f, -0.5f, // Far-right
+                0.5f, -0.5f, 0.5f, // Close-right
+                -0.5f, -0.5f, 0.5f, // Close-left
+                -0.5f, -0.5f, -0.5f, // Far-Left
+                // Left
+                -0.5f, -0.5f, -0.5f, // Bottom-left
+                -0.5f, -0.5f, 0.5f, // Bottom-right
+                -0.5f, 0.5f, 0.5f, // Top-right
+                -0.5f, 0.5f, -0.5f, // Top-Left
+                // Right
+                0.5f, -0.5f, 0.5f, // Bottom-left
+                0.5f, -0.5f, -0.5f, // Bottom-right
+                0.5f, 0.5f, -0.5f, // Top-right
+                0.5f, 0.5f, 0.5f, // Top-left
+            };
+            float[] normals = new float[]
+            {
+                // Front
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                // Back
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                // Top
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                // Bottom
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                // Left
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                // Right
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+            };
+            uint[] indices = new uint[]
+            {
+                0, 1, 2,
+                0, 2, 3,
+                4, 5, 6,
+                4, 6, 7,
+                8, 9, 10,
+                8, 10, 11,
+                12, 13, 14,
+                12, 14, 15,
+                16, 17, 18,
+                16, 18, 19,
+                20, 21, 22,
+                20, 22, 23,
+            };
+            IlluminatedModel cube = new IlluminatedModel(vertices, indices, normals);
+            cube.Shader = new Shader("Shaders/Shader.vert", "Shaders/Lighting.frag");
+            cube.Initialize();
             return cube;
         }
         protected static float[] FloatVAOMerge(float[] a, int aStride, float[] b, int bStride)
@@ -150,9 +237,47 @@ namespace opentk_example
 
     class IlluminatedModel : Model
     {
-        public IlluminatedModel() : base(null, null)
+        private readonly float[] _vao;
+        public Vector3 lightPositon;
+        public IlluminatedModel(float[] vertices, uint[] indices, float[] normals) : base(vertices, indices)
         {
+            _vao = FloatVAOMerge(_vertices, 3, normals, 3);
+        }
+        protected override void Initialize()
+        {
+            _vboHandle = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vboHandle);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vao.Length * sizeof(float), _vao, BufferUsageHint.StaticDraw);
 
+            _vaoHandle = GL.GenVertexArray();
+            GL.BindVertexArray(_vaoHandle);
+            // Position pointers
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(0);
+            // Normal pointers
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
+
+            _eboHandle = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _eboHandle);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
+        }
+        public override void Draw(bool final = true)
+        {
+            base.Draw(false);
+            _shader.SetVector3("viewPos", _camera.Position);
+
+            _shader.SetVector3("material.ambient", new Vector3(1.0f, 0.5f, 0.31f));
+            _shader.SetVector3("material.diffuse", new Vector3(1.0f, 0.5f, 0.31f));
+            _shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
+            _shader.SetFloat("material.shininess", 32f);
+
+            _shader.SetVector3("light.position", lightPositon);
+            _shader.SetVector3("light.ambient", new Vector3(0.2f));
+            _shader.SetVector3("light.diffuse", new Vector3(0.5f));
+            _shader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+
+            if (final) GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
     }
 }

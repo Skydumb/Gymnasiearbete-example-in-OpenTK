@@ -59,7 +59,6 @@ namespace opentk_example
         private int _vertexBufferObject;
         private int _vertexArrayObject;
         private Shader _shader;
-        private Shader _lightShader;
         private int _elementBufferObject;
         private Texture _texture;
         private Texture _texture2;
@@ -68,6 +67,7 @@ namespace opentk_example
         private bool _firstMove = true;
         private Vector2 _lastPos;
         private Model _cubePrim;
+        private IlluminatedModel _litCubePrim;
 
         private readonly Vector3 _lightPos = new Vector3(1.2f, 1.0f, 2.0f);
 
@@ -141,11 +141,14 @@ namespace opentk_example
         {
             base.OnLoad();
 
-            GL.ClearColor(1f, 1f, 1f, 1f);
+            GL.ClearColor(0.5f, 0.7f, 1f, 1f);
 
             GL.Enable(EnableCap.DepthTest);
 
             _cubePrim = Model.CubePrimitive();
+            _litCubePrim = Model.SharpCubePrimitve();
+
+            _litCubePrim.lightPositon = _lightPos;
             // Creating and binding VBO
             _vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -170,8 +173,7 @@ namespace opentk_example
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
 
             // Adding Shaders
-            _lightShader = new Shader("Shaders/Shader.vert", "Shaders/Lighting.frag");
-            _shader = new Shader("Shaders/Shader.vert", "Shaders/Shader.frag");
+            _shader = new Shader("Shaders/TextureShader.vert", "Shaders/TextureShader.frag");
             _shader.Use();
             // Binding textures
             _shader.SetInt("texture0", 0);
@@ -180,6 +182,9 @@ namespace opentk_example
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             CursorGrabbed = true;
             _cubePrim.Camera = _camera;
+            _litCubePrim.Camera = _camera;
+
+            _litCubePrim.transform *= Matrix4.CreateRotationX(MathHelper.PiOver3) * Matrix4.CreateTranslation(2.0f, 0.0f, -1.0f);
 
             //GL.GetInteger(GetPName.MaxVertexAttribs, out int maxAttributeCount);
             //Debug.WriteLine($"Max vertex attributes: {maxAttributeCount}");
@@ -208,10 +213,9 @@ namespace opentk_example
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             _cubePrim.Draw();
+            _litCubePrim.Draw();
 
             GL.BindVertexArray(_vertexArrayObject);
-
-            _lightShader.Use();
 
             var transform = Matrix4.Identity;
             transform *= Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(_renderTime * 5));

@@ -24,10 +24,10 @@
     <None Update="Shaders\DefaultShader.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Shaders\Shader.frag">
+    <None Update="Shaders\TextureShader.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Shaders\Shader.vert">
+    <None Update="Shaders\TextureShader.vert">
       <CopyToOutputDirectory>preserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
