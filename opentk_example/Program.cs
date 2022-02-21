@@ -89,7 +89,7 @@ namespace opentk_example
             var input = KeyboardState;
             if (input.IsKeyDown(Keys.Escape)) this.Close();
             // Moving cube
-            _cubePrim.transform *= Matrix4.CreateTranslation(0.0f, 0.5f * (float)deltaTime, 0.0f);
+            //_cubePrim.transform *= Matrix4.CreateTranslation(0.0f, 0.5f * (float)deltaTime, 0.0f);
 
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.2f;
@@ -185,6 +185,7 @@ namespace opentk_example
             _litCubePrim.Camera = _camera;
 
             _litCubePrim.transform *= Matrix4.CreateRotationX(MathHelper.PiOver3) * Matrix4.CreateTranslation(2.0f, 0.0f, -1.0f);
+            _cubePrim.transform *= Matrix4.CreateTranslation(3.0f, 0.5f, 0.0f);
 
             //GL.GetInteger(GetPName.MaxVertexAttribs, out int maxAttributeCount);
             //Debug.WriteLine($"Max vertex attributes: {maxAttributeCount}");
