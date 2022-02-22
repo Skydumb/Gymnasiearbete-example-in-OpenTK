@@ -186,6 +186,130 @@ namespace opentk_example
             cube.Initialize();
             return cube;
         }
+        public static TexturedModel SharpTexturedCubePrimitive()
+        {
+            float[] vertices = new float[]
+            {
+                // Front
+                0.5f, 0.5f, 0.5f, // Top-close-right
+                0.5f, -0.5f, 0.5f, // Bottom-close-right
+                -0.5f, -0.5f, 0.5f, // Bottom-close-left
+                -0.5f, 0.5f, 0.5f, // Top-close-left
+                // Back
+                -0.5f, 0.5f, -0.5f, // Top-far-left
+                -0.5f, -0.5f, -0.5f, // Bottom-far-left
+                0.5f, -0.5f, -0.5f, // Bottom-far-right
+                0.5f, 0.5f, -0.5f, // Top-far-right
+                // Top
+                0.5f, 0.5f, 0.5f,
+                0.5f, 0.5f, -0.5f,
+                -0.5f, 0.5f, -0.5f,
+                -0.5f, 0.5f, 0.5f,
+                // Bottom
+                0.5f, -0.5f, -0.5f, // Far-right
+                0.5f, -0.5f, 0.5f, // Close-right
+                -0.5f, -0.5f, 0.5f, // Close-left
+                -0.5f, -0.5f, -0.5f, // Far-Left
+                // Left
+                -0.5f, -0.5f, -0.5f, // Bottom-left
+                -0.5f, -0.5f, 0.5f, // Bottom-right
+                -0.5f, 0.5f, 0.5f, // Top-right
+                -0.5f, 0.5f, -0.5f, // Top-Left
+                // Right
+                0.5f, -0.5f, 0.5f, // Bottom-left
+                0.5f, -0.5f, -0.5f, // Bottom-right
+                0.5f, 0.5f, -0.5f, // Top-right
+                0.5f, 0.5f, 0.5f, // Top-left
+            };
+            float[] normals = new float[]
+            {
+                // Front
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                // Back
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                // Top
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                // Bottom
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                // Left
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                // Right
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+            };
+            uint[] indices = new uint[]
+            {
+                0, 1, 2,
+                0, 2, 3,
+                4, 5, 6,
+                4, 6, 7,
+                8, 9, 10,
+                8, 10, 11,
+                12, 13, 14,
+                12, 14, 15,
+                16, 17, 18,
+                16, 18, 19,
+                20, 21, 22,
+                20, 22, 23,
+            };
+            float[] texCoords = new float[]
+            {
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+
+                1.0f, 1.0f,
+                1.0f, 0.0f,
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+            };
+            TexturedModel cube = new TexturedModel(vertices, indices, texCoords, normals)
+            {
+                Shader = new Shader("Shaders/Shader.vert", "Shaders/Mapping.frag"),
+                Texture = Texture.LoadFromFile("Resources/container.png"),
+                SpecularMap = Texture.LoadFromFile("Resources/container.png")
+            };
+            cube.Initialize();
+            return cube;
+        }
         protected static float[] FloatVAOMerge(float[] a, int aStride, float[] b, int bStride)
         {
             float[] vao = new float[a.Length + b.Length];
@@ -209,13 +333,15 @@ namespace opentk_example
     class TexturedModel : Model
     {
         private Texture _texture;
-        private Texture _texture1;
-        protected readonly float[] _texCoords;
-        public TexturedModel(float[] vertices, uint[] indices, float[] texCoords) : base(vertices, indices)
+        private Texture _specMap;
+        private readonly float[] _vao;
+        public Vector3 lightPosition;
+        public TexturedModel(float[] vertices, uint[] indices, float[] texCoords, float[] normals) : base(vertices, indices)
         {
-
+            float[] vao = FloatVAOMerge(vertices, 3, normals, 3);
+            _vao = FloatVAOMerge(vao, 6, texCoords, 2);
         }
-        public Texture Texture0
+        public Texture Texture
         {
             get => _texture;
             set
@@ -224,14 +350,55 @@ namespace opentk_example
                 _texture.Use(TextureUnit.Texture0);
             }
         }
-        public Texture Texture1
+        public Texture SpecularMap
         {
-            get => _texture1;
+            get => _specMap;
             set
             {
-                _texture1 = value;
-                _texture.Use(TextureUnit.Texture1);
+                _specMap = value;
+                _specMap.Use(TextureUnit.Texture1);
             }
+        }
+        protected override void Initialize()
+        {
+            _vboHandle = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vboHandle);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vao.Length * sizeof(float), _vao, BufferUsageHint.StaticDraw);
+
+            _vaoHandle = GL.GenVertexArray();
+            GL.BindVertexArray(_vaoHandle);
+            // Position pointers
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(0);
+            // Normal pointers
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
+            // Texture pointers
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+            GL.EnableVertexAttribArray(2);
+
+            _eboHandle = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _eboHandle);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StaticDraw);
+        }
+        public override void Draw(bool final = true)
+        {
+            base.Draw(false);
+            _shader.SetVector3("viewPos", _camera.Position);
+
+            _shader.SetInt("material.diffuse", 0);
+            _shader.SetInt("material.specular", 1);
+            _shader.SetFloat("material.shininess", 32f);
+
+            _shader.SetVector3("light.position", lightPosition);
+            _shader.SetVector3("light.ambient", new Vector3(0.2f));
+            _shader.SetVector3("light.diffuse", new Vector3(0.5f));
+            _shader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
+
+            _texture.Use(TextureUnit.Texture0);
+            _specMap.Use(TextureUnit.Texture1);
+
+            if (final) GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
         }
     }
 
@@ -267,7 +434,7 @@ namespace opentk_example
             base.Draw(false);
             _shader.SetVector3("viewPos", _camera.Position);
 
-            _shader.SetVector3("material.ambient", new Vector3(1.0f, 0.5f, 0.31f));
+            _shader.SetVector3("material.ambient", new Vector3(1.5f, 0.5f, 0.31f));
             _shader.SetVector3("material.diffuse", new Vector3(1.0f, 0.5f, 0.31f));
             _shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
             _shader.SetFloat("material.shininess", 32f);

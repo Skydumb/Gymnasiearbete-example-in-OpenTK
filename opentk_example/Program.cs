@@ -13,7 +13,7 @@ namespace opentk_example
     {
         static void Main()
         {
-            using Window window = new Window(800, 600, "Window");
+            using Window window = new Window(1000, 1200, "Window");
             window.Run();
         }
     }
@@ -68,6 +68,7 @@ namespace opentk_example
         private Vector2 _lastPos;
         private Model _cubePrim;
         private IlluminatedModel _litCubePrim;
+        private TexturedModel _litTexCubePrim;
 
         private readonly Vector3 _lightPos = new Vector3(1.2f, 1.0f, 2.0f);
 
@@ -147,8 +148,10 @@ namespace opentk_example
 
             _cubePrim = Model.CubePrimitive();
             _litCubePrim = Model.SharpCubePrimitve();
+            _litTexCubePrim = Model.SharpTexturedCubePrimitive();
 
             _litCubePrim.lightPositon = _lightPos;
+            _litTexCubePrim.lightPosition = _lightPos;
             // Creating and binding VBO
             _vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -181,11 +184,14 @@ namespace opentk_example
             // Creating a camera object and capturing the cursor
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             CursorGrabbed = true;
+            // Attaching camera
             _cubePrim.Camera = _camera;
             _litCubePrim.Camera = _camera;
+            _litTexCubePrim.Camera = _camera;
 
             _litCubePrim.transform *= Matrix4.CreateRotationX(MathHelper.PiOver3) * Matrix4.CreateTranslation(2.0f, 0.0f, -1.0f);
             _cubePrim.transform *= Matrix4.CreateTranslation(3.0f, 0.5f, 0.0f);
+            _litTexCubePrim.transform *= Matrix4.CreateTranslation(3.0f, 1.5f, -2.0f);
 
             //GL.GetInteger(GetPName.MaxVertexAttribs, out int maxAttributeCount);
             //Debug.WriteLine($"Max vertex attributes: {maxAttributeCount}");
@@ -215,6 +221,7 @@ namespace opentk_example
 
             _cubePrim.Draw();
             _litCubePrim.Draw();
+            _litTexCubePrim.Draw();
 
             GL.BindVertexArray(_vertexArrayObject);
 
