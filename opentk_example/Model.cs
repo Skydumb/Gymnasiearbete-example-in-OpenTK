@@ -390,7 +390,7 @@ namespace opentk_example
             _shader.SetInt("material.specular", 1);
             _shader.SetFloat("material.shininess", 32f);
 
-            _shader.SetVector3("light.position", lightPosition);
+            _shader.SetVector3("light.direction", lightPosition);
             _shader.SetVector3("light.ambient", new Vector3(0.2f));
             _shader.SetVector3("light.diffuse", new Vector3(0.5f));
             _shader.SetVector3("light.specular", new Vector3(1.0f, 1.0f, 1.0f));
