@@ -305,7 +305,7 @@ namespace opentk_example
             {
                 Shader = new Shader("Shaders/Shader.vert", "Shaders/Mapping.frag"),
                 Texture = Texture.LoadFromFile("Resources/container.png"),
-                SpecularMap = Texture.LoadFromFile("Resources/container.png")
+                SpecularMap = Texture.LoadFromFile("Resources/hamster.png")
             };
             cube.Initialize();
             return cube;
